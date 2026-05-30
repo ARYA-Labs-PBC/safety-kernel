@@ -138,6 +138,31 @@ jobs:
           python -m twine check dist/*
 
   # ============================================================
+  # AF taxonomy: ARY-1887 release-gate adversarial coverage script.
+  # Enforces "every AF class has >=1 Rust fixture + >=1 Python fixture
+  # (or an explicit deferral stub)" per docs/release-gate/af-taxonomy.md.
+  # Bash + find only — no toolchain dependencies, no third-party
+  # actions beyond actions/checkout.
+  # ============================================================
+  af-coverage:
+    name: AF taxonomy coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run scripts/audit_adversarial_coverage.sh
+        run: bash scripts/audit_adversarial_coverage.sh
+
+      - name: Run Python AF seed fixtures (pure stdlib)
+        # Override pytest's default `test_*.py` pattern to match the
+        # `af_<class>_seed.py` naming the coverage script enforces.
+        run: |
+          python -m pip install --quiet pytest
+          python -m pytest tests/adversarial/python/ \
+            -o python_files='af_*_seed.py' -v
+
+  # ============================================================
   # OpenAPI: spec validity + schema-against-implementation drift smoke
   # ============================================================
   openapi:
