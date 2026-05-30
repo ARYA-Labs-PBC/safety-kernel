@@ -89,9 +89,9 @@ fn af_key_seed_accepts_token_signed_with_pinned_key() {
     let now = 1_700_000_000.0_f64;
     let token = sign_kernel_token(&sample_claims(now), &signing);
     let verifier = PinnedKeyVerifier::from_pubkey_bytes(public).expect("valid pubkey");
-    let verified = verifier.verify(&token, now + 1.0).expect(
-        "AF-key seed counter-assertion: legitimate token MUST verify under the pinned key",
-    );
+    let verified = verifier
+        .verify(&token, now + 1.0)
+        .expect("AF-key seed counter-assertion: legitimate token MUST verify under the pinned key");
     assert_eq!(
         verified.claims.get("action").and_then(|v| v.as_str()),
         Some("af_key_seed_action"),

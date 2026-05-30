@@ -95,10 +95,10 @@ fn structural_lint(dockerfile_src: &str) -> Vec<String> {
     // Property 3: Non-root user. Look for a USER directive that names
     // 65532 or `nonroot`. (Either form is acceptable; distroless ships
     // both.)
-    let has_nonroot_user = dockerfile_src.lines().map(str::trim).any(|l| {
-        l.starts_with("USER ")
-            && (l.contains("65532") || l.contains("nonroot"))
-    });
+    let has_nonroot_user = dockerfile_src
+        .lines()
+        .map(str::trim)
+        .any(|l| l.starts_with("USER ") && (l.contains("65532") || l.contains("nonroot")));
     if !has_nonroot_user {
         violations.push(
             "expected USER directive switching to non-root (uid 65532 or 'nonroot')".to_string(),
@@ -113,8 +113,8 @@ fn af_image_seed_real_dockerfile_passes_lint() {
     // The shipped `Dockerfile.prod` MUST satisfy the lint. If this
     // fails, someone has edited the production Dockerfile and broken
     // the supply-chain story; the release gate must NOT sign v1.0.
-    let dockerfile_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../../Dockerfile.prod");
+    let dockerfile_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../Dockerfile.prod");
     let src = std::fs::read_to_string(&dockerfile_path).unwrap_or_else(|e| {
         panic!(
             "AF-image seed: cannot read {dockerfile_path:?}: {e}. \
@@ -162,9 +162,7 @@ fn af_image_seed_rejects_synthetic_fake_dockerfile() {
          multi-stage violation. Got violations: {violations:#?}"
     );
 
-    let has_distroless_violation = violations
-        .iter()
-        .any(|v| v.contains("distroless"));
+    let has_distroless_violation = violations.iter().any(|v| v.contains("distroless"));
     assert!(
         has_distroless_violation,
         "AF-image seed: synthetic-fake ubuntu:24.04 Dockerfile must trigger the \
